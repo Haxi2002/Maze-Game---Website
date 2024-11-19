@@ -1,20 +1,16 @@
-// إعداد اللعبة
 const canvas = document.getElementById("mazeCanvas");
 const ctx = canvas.getContext("2d");
 const backButton = document.getElementById("back");
 
-// ضبط أبعاد ودقة الـ canvas لتحسين جودة الصور
-canvas.width = 800; // العرض الداخلي
-canvas.height = 800; // الارتفاع الداخلي
-canvas.style.width = "400px"; // العرض المرئي
-canvas.style.height = "400px"; // الارتفاع المرئي
+canvas.width = 800; 
+canvas.height = 800; 
+canvas.style.width = "400px";
+canvas.style.height = "400px"; 
 
-// استخراج اسم الشخصية من الرابط
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const character = urlParams.get("character");
 
-// تحميل صورة الشخصية المختارة
 const characterImg = new Image();
 if (character === "abdulaziz") {
   characterImg.src = "abdulaziz.png";
@@ -31,15 +27,13 @@ if (character === "abdulaziz") {
 } else if (character === "abdullah") {
   characterImg.src = "abdullah.png";
 } else {
-  characterImg.src = "default.png"; // صورة افتراضية إذا لم يتم اختيار شخصية
+  characterImg.src = "default.png"; 
 }
 
-// تحميل صورة الهدف
 const goalImg = new Image();
-goalImg.src = "goal.png"; // صورة الهدف
+goalImg.src = "goal.png"; 
 
-// إعداد المتغيرات
-const tileSize = 80; // حجم الخلية
+const tileSize = 80; 
 const maze = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
@@ -52,43 +46,72 @@ const maze = [
   [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
-const player = { x: 1, y: 1 }; // موقع البداية
-const goal = { x: 8, y: 7 }; // موقع الهدف
+const player = { x: 1, y: 1 };
+const goal = { x: 8, y: 7 }; 
 
-// تعطيل التمويه لتحسين جودة الصور
 ctx.imageSmoothingEnabled = false;
 
-// رسم المتاهة
+
 function drawMaze() {
   for (let row = 0; row < maze.length; row++) {
     for (let col = 0; col < maze[row].length; col++) {
-      ctx.fillStyle = maze[row][col] === 1 ? "#F9560B" : "#0014FF"; // جدران برتقالية، خلفية زرقاء
+      ctx.fillStyle = maze[row][col] === 1 ? "#F9560B" : "#0014FF"; 
       ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
     }
   }
 
-  // رسم الهدف
   ctx.drawImage(goalImg, goal.x * tileSize + 10, goal.y * tileSize + 10, tileSize - 20, tileSize - 20);
 }
 
-// رسم الشخصية
 function drawPlayer() {
   ctx.drawImage(characterImg, player.x * tileSize + 10, player.y * tileSize + 10, tileSize - 20, tileSize - 20);
 }
 
-// تحديث اللعبة
 function updateGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawMaze();
   drawPlayer();
 }
 
-// التحكم في اللاعب
 document.addEventListener("keydown", (e) => {
+  handleMovement(e.key);
+});
+
+let startX, startY;
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  startX = touch.clientX;
+  startY = touch.clientY;
+});
+
+canvas.addEventListener("touchend", (e) => {
+  const touch = e.changedTouches[0];
+  const endX = touch.clientX;
+  const endY = touch.clientY;
+
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    if (diffX > 0) {
+      handleMovement("ArrowRight"); 
+    } else {
+      handleMovement("ArrowLeft"); 
+    }
+  } else {
+    if (diffY > 0) {
+      handleMovement("ArrowDown"); 
+    } else {
+      handleMovement("ArrowUp"); 
+    }
+  }
+});
+
+function handleMovement(direction) {
   let newX = player.x;
   let newY = player.y;
 
-  switch (e.key) {
+  switch (direction) {
     case "ArrowUp":
       newY -= 1;
       break;
@@ -103,14 +126,13 @@ document.addEventListener("keydown", (e) => {
       break;
   }
 
-  // التحقق من حدود المتاهة
   if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length && maze[newY][newX] === 0) {
     player.x = newX;
     player.y = newY;
     updateGame();
     checkWin();
   }
-});
+}
 
 // التحقق من الفوز
 function checkWin() {
@@ -119,16 +141,14 @@ function checkWin() {
       const message = document.getElementById("message");
       message.textContent = "مبروك! وصلت إلى الهدف!"; // عرض رسالة الفوز
     }, 100);
-    launchFireworks(); // تشغيل الألعاب النارية
+    launchFireworks(); 
   }
 }
 
-// زر العودة للصفحة الرئيسية
 backButton.addEventListener("click", () => {
   window.location.href = "index.html";
 });
 
-// الألعاب النارية
 function launchFireworks() {
   const particles = [];
   const colors = ["#FF5733", "#FFC300", "#DAF7A6", "#C70039", "#900C3F"];
@@ -149,14 +169,14 @@ function launchFireworks() {
     particles.forEach((particle, index) => {
       particle.x += particle.speedX;
       particle.y += particle.speedY;
-      particle.size *= 0.96; // تصغير الحجم تدريجيًا
+      particle.size *= 0.96; 
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
       ctx.fillStyle = particle.color;
       ctx.fill();
 
       if (particle.size < 0.5) {
-        particles.splice(index, 1); // إزالة الجسيمات الصغيرة جدًا
+        particles.splice(index, 1);
       }
     });
 
@@ -172,10 +192,10 @@ function launchFireworks() {
   updateParticles();
 }
 
-// بدء اللعبة
 goalImg.onload = () => {
   updateGame();
 };
 characterImg.onload = () => {
   updateGame();
 };
+
